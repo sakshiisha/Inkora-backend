@@ -1,6 +1,15 @@
 const Blog = require('../models/Blog')
 const User = require('../models/User')
 
+// Helper: strip HTML tags for clean excerpt
+function stripHtml(html = '') {
+  return html
+    .replace(/<[^>]*>/g, ' ')       // remove all HTML tags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')           // collapse multiple spaces
+    .trim()
+}
+
 // GET /api/blogs  (public — only published)
 exports.getAllBlogs = async (req, res) => {
   try {
@@ -47,13 +56,15 @@ exports.createBlog = async (req, res) => {
       return res.status(400).json({ message: 'Title and content are required' })
     }
 
+    const cleanText = stripHtml(content)
+
     const blog = await Blog.create({
       title,
       content,
       category: category || 'Essay',
       image,
-      excerpt: excerpt || content.slice(0, 150),
-      readTime: readTime || `${Math.max(1, Math.round(content.split(' ').length / 200))} min read`,
+      excerpt: excerpt || cleanText.slice(0, 150),
+      readTime: readTime || `${Math.max(1, Math.round(cleanText.split(' ').length / 200))} min read`,
       status: status || 'published',
       userId: req.user.id,
     })
@@ -98,7 +109,7 @@ exports.deleteBlog = async (req, res) => {
   }
 }
 
-// GET /api/blogs/my/posts  (protected — logged-in user's own posts, incl. drafts)
+// GET /api/blogs/my/posts  (protected)
 exports.getMyBlogs = async (req, res) => {
   try {
     const blogs = await Blog.findAll({
