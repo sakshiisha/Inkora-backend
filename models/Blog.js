@@ -13,7 +13,7 @@ const Blog = sequelize.define('Blog', {
     allowNull: false,
   },
   content: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT('long'),
     allowNull: false,
   },
   excerpt: {
@@ -26,7 +26,7 @@ const Blog = sequelize.define('Blog', {
     defaultValue: 'Essay',
   },
   image: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT('long'),
     allowNull: true,
   },
   readTime: {
@@ -42,7 +42,6 @@ const Blog = sequelize.define('Blog', {
   timestamps: true,
 })
 
-// Relationships — one user has many blogs
 User.hasMany(Blog, { foreignKey: 'userId', onDelete: 'CASCADE' })
 Blog.belongsTo(User, { foreignKey: 'userId' })
 
